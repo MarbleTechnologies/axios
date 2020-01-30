@@ -13,36 +13,36 @@ jasmine.getEnv().defaultTimeoutInterval = 20000;
 
 // Get Ajax request using an increasing timeout to retry
 getAjaxRequest = (function () {
-var attempts = 0;
-var MAX_ATTEMPTS = 5;
-var ATTEMPT_DELAY_FACTOR = 5;
+  var attempts = 0;
+  var MAX_ATTEMPTS = 5;
+  var ATTEMPT_DELAY_FACTOR = 5;
 
-function getAjaxRequest() {
-  return new Promise(function (resolve, reject) {
-    attempts = 0;
-    attemptGettingAjaxRequest(resolve, reject);
-  });
-}
-
-function attemptGettingAjaxRequest(resolve, reject) {
-  var delay = attempts * attempts * ATTEMPT_DELAY_FACTOR;
-
-  if (attempts++ > MAX_ATTEMPTS) {
-    reject(new Error('No request was found'));
-    return;
+  function getAjaxRequest() {
+    return new Promise(function (resolve, reject) {
+      attempts = 0;
+      attemptGettingAjaxRequest(resolve, reject);
+    });
   }
 
-  setTimeout(function () {
-    var request = jasmine.Ajax.requests.mostRecent();
-    if (request) {
-      resolve(request);
-    } else {
-      attemptGettingAjaxRequest(resolve, reject);
-    }
-  }, delay);
-}
+  function attemptGettingAjaxRequest(resolve, reject) {
+    var delay = attempts * attempts * ATTEMPT_DELAY_FACTOR;
 
-return getAjaxRequest;
+    if (attempts++ > MAX_ATTEMPTS) {
+      reject(new Error('No request was found'));
+      return;
+    }
+
+    setTimeout(function () {
+      var request = jasmine.Ajax.requests.mostRecent();
+      if (request) {
+        resolve(request);
+      } else {
+        attemptGettingAjaxRequest(resolve, reject);
+      }
+    }, delay);
+  }
+
+  return getAjaxRequest;
 })();
 
 // Validate an invalid character error
@@ -82,11 +82,14 @@ setupBasicAuthTest = function setupBasicAuthTest() {
         username: 'Aladßç£☃din',
         password: 'open sesame'
       }
-    }).then(function(response) {
+    }).then(function (response) {
       done(new Error('Should not succeed to make a HTTP Basic auth request with non-latin1 chars in credentials.'));
-    }).catch(function(error) {
+    }).catch(function (error) {
       validateInvalidCharacterError(error);
       done();
     });
   });
 };
+
+// Is this an old version of IE that lacks standard objects like DataView, ArrayBuffer, FormData, etc.
+isOldIE = /MSIE (8|9)\.0/.test(navigator.userAgent);
